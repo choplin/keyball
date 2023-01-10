@@ -38,36 +38,38 @@ enum layers {
 // const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [BASE] = LAYOUT_universal(
-    LT(ARROW, KC_ESC) , KC_Q    , KC_W    , KC_E     , KC_R           , KC_T     ,                                  KC_Y     , KC_U     , KC_I     , KC_O     , KC_P           , LT(ARROW, KC_LBRC),
-    LCTL_T(KC_TAB)    , KC_A    , KC_S    , KC_D     , KC_F           , KC_G     ,                                  KC_H     , KC_J     , KC_K     , KC_L     , RCTL_T(KC_SCLN), C_S_T(KC_RBRC) ,
-    LSFT_T(KC_MINS)   , KC_Z    , KC_X    , KC_C     , LT(ARROW,KC_V) , KC_B     ,                                  KC_N     , KC_M     , KC_COMM  , KC_DOT   , RSFT_T(KC_SLSH), RALT_T(KC_BSLS),
-                                     TO(BASE), KC_LGUI,     KC_BSPC ,KC_SPC, KC_LCTL,                KC_RCTL, LT(NUM,KC_ENT)       , _______  , _______  , SCRL_TO
+    LT(ARROW, KC_ESC) , KC_Q    , KC_W    , KC_E     , KC_R     , KC_T     ,                                  KC_Y     , KC_U     , KC_I     , KC_O     , KC_P           , LT(ARROW, KC_LBRC),
+    LCTL_T(KC_TAB)    , KC_A    , KC_S    , KC_D     , KC_F     , KC_G     ,                                  KC_H     , KC_J     , KC_K     , KC_L     , RCTL_T(KC_SCLN), C_S_T(KC_RBRC) ,
+    LSFT_T(KC_MINS)   , KC_Z    , KC_X    , KC_C     , KC_V     , KC_B     ,                                  KC_N     , KC_M     , KC_COMM  , KC_DOT   , RSFT_T(KC_SLSH), RALT_T(KC_BSLS),
+                                  TO(BASE), KC_F12,     KC_BSPC ,KC_SPC, KC_LCTL,                   KC_RCTL, LT(NUM,KC_ENT)       , _______  , _______  , _______
   ),
 
   [NUM] = LAYOUT_universal(
-    KC_EQL            ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0)         , KC_QUOT ,
-    LCTL_T(S(KC_EQL)) ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0            , S(KC_QUOT) ,
-    LSFT_T(KC_GRAVE)  ,  RCS(KC_1) , RCS(KC_2) , RCS(KC_3) , RCS(KC_4) , RCS(KC_5) ,                                       RCS(KC_6) , RCS(KC_7) , RCS(KC_8) , RCS(KC_9) , RSFT_T(KC_BSLS) , KC_BSLS ,
-                                _______   , _______             , _______ , _______ , _______ ,                  _______  , _______         , _______   , _______   , _______
+    KC_EQL            ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0) , KC_QUOT ,
+    LCTL_T(S(KC_EQL)) ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0    , S(KC_QUOT) ,
+    LSFT_T(KC_GRAVE)  ,  RCS(KC_1) , RCS(KC_2) , RCS(KC_3) , RCS(KC_4) , RCS(KC_5) ,                                       RCS(KC_6) , RCS(KC_7) , RCS(KC_8) , RCS(KC_9) , KC_DEL  , S(KC_GRAVE) ,
+                                     _______   , _______       , _______ , _______ , _______ ,                      _______  , _______           , _______   , _______   , _______
   ),
 
   [MOUSE] = LAYOUT_universal(
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        _______  , _______ , _______ , _______ , _______ , _______ ,
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        _______  , KC_BTN1 , SCRL_TO , KC_BTN2 , _______ , _______ ,
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        _______  , SCRL_MO , _______ , _______ , _______ , _______ ,
-                          _______ , _______  ,    _______  , _______  , _______  ,                   _______  , _______        , _______ , _______ , _______
+                        _______ , _______  ,    _______  , _______  , _______  ,                _______  , _______        , _______ , _______ , _______
   ),
 
   [ARROW] = LAYOUT_universal(
     RGB_TOG  , _______  , KBC_RST , KBC_SAVE , SCRL_DVD , SCRL_DVI ,                                       KC_HOME    , KC_PGDN    , KC_PGUP  , KC_END      , _______ , _______ ,
     RGB_MOD  , RGB_HUI  , RGB_SAI , RGB_VAI  , CPI_D1K  , CPI_I1K  ,                                       KC_LEFT    , KC_DOWN    , KC_UP    , KC_RIGHT    , _______ , _______ ,
     RGB_RMOD , RGB_HUD  , RGB_SAD , RGB_VAD  , CPI_D100 , CPI_I100 ,                                       C(KC_LEFT) , C(KC_DOWN) , C(KC_UP) , C(KC_RIGHT) , _______ , _______ ,
-                         _______ , _______    , _______ , _______ , QK_BOOT ,                   _______  , _______              , _______  , _______     , _______
+                         _______ , _______    , _______ , _______ , QK_BOOT ,                      _______  , _______              , _______  , _______     , _______
   ),
 };
 // clang-format on
 
+int current_layer = BASE;
 layer_state_t layer_state_set_user(layer_state_t state) {
+    current_layer = get_highest_layer(state);
     keyball_set_scroll_mode(get_highest_layer(state) == ARROW);
     return state;
 }
@@ -148,6 +150,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 mouse_state.after_click_mouse_movement = 0;
             } else {
                 currentReport.buttons &= ~btn;
+                mouse_state.state = MOUSE_LAYER_ENABLED;
             }
 
             mouse_state.mouse_moved_timer = timer_read();
@@ -157,25 +160,25 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         }
 
-         default:
+        case SCRL_TO:
+        case SCRL_MO:
+            return true;
+
+        default:
             if  (record->event.pressed) {
                 if (mouse_state.state == CLICKING) {
-                    enable_mouse_layer();
-                    return false;
+                    return true;
                 } else if (mouse_state.state == MOUSE_LAYER_ENABLED) {
                     for (int i = 0; i < keys_to_ignore_for_disabling_mouse_layer_length; i++) {
                         if (keycode == keys_to_ignore_for_disabling_mouse_layer[i]) {
-                            enable_mouse_layer();
                             return false;
                         }
                     }
                 }
                 disable_mouse_layer();
             }
-
+            return true;
     }
-
-    return true;
 }
 
 
@@ -256,7 +259,24 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 #    include "lib/oledkit/oledkit.h"
 
 void my_oled_render_mouse_info(void) {
-    oled_write_P(PSTR("MOUSE:"), false);
+    oled_write_P(PSTR("L:"), false);
+    switch (current_layer) {
+        case BASE:
+            oled_write_P(PSTR("BASE "), false);
+            break;
+        case NUM:
+            oled_write_P(PSTR("NUM  "), false);
+            break;
+        case MOUSE:
+            oled_write_P(PSTR("ARROW"), false);
+            break;
+        case ARROW:
+            oled_write_P(PSTR("ARROW"), false);
+            break;
+        default:
+            break;
+    }
+    oled_write_P(PSTR("  M:"), false);
     switch (mouse_state.state) {
         case MOUSE_MOVED:
             oled_write_P(PSTR("Moved  "), false);
