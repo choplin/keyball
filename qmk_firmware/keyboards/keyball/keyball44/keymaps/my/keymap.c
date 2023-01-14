@@ -98,16 +98,16 @@ void my_oled_render_info(void) {
     oled_write_P(PSTR("L:"), false);
     switch (current_layer) {
     case BASE:
-        oled_write_P(PSTR("BASE "), false);
+        oled_write_P(PSTR("Base "), false);
         break;
     case NUM:
-        oled_write_P(PSTR("NUM  "), false);
+        oled_write_P(PSTR("Num  "), false);
         break;
     case MOUSE:
-        oled_write_P(PSTR("MOUSE"), false);
+        oled_write_P(PSTR("Mouse"), false);
         break;
     case ARROW:
-        oled_write_P(PSTR("ARROW"), false);
+        oled_write_P(PSTR("Arrow"), false);
         break;
     default:
         break;
