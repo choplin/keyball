@@ -1,0 +1,9 @@
+{
+  "keyboard_name": "Keyball44",
+  "manufacturer": "Yowkees",
+  "usb": {
+    "vid": "0x5957",
+    "pid": "0x0400",
+    "device_version": "0.0.1"
+  }
+}
