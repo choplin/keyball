@@ -18,14 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
-#include "quantum.h"
 #include "avr/pgmspace.h"
-#include "report.h"
-#include "pointing_device.h"
-#include "keyball44/keyball44.h"
 #include "keyball44/config.h"
+#include "keyball44/keyball44.h"
+#include "pointing_device.h"
+#include "quantum.h"
+#include "report.h"
 #include "stdint.h"
-
 
 enum layers {
     BASE = 0,
@@ -92,12 +91,12 @@ struct mouse_state_t mouse_state = {
     .after_click_mouse_movement = 0,
 };
 
-union user_config_t{
-  uint32_t raw;
-  struct {
-    int16_t mouse_movement_threshold;
-  };
-} ;
+union user_config_t {
+    uint32_t raw;
+    struct {
+        int16_t mouse_movement_threshold;
+    };
+};
 union user_config_t user_config;
 
 void eeconfig_init_user(void) {
@@ -106,16 +105,16 @@ void eeconfig_init_user(void) {
     eeconfig_update_user(user_config.raw);
 }
 
-void keyboard_post_init_user(void) {
-    user_config.raw = eeconfig_read_user();
-}
+void keyboard_post_init_user(void) { user_config.raw = eeconfig_read_user(); }
 
 #define MOUSE_LAYER_TIMEOUT 500
 #define MOUSE_MOVED_STATE_TIMEOUT 500
 #define MOUSE_MOVE_LOCK_AFTER_CLICK 30
 
 const uint16_t keys_to_ignore_for_disabling_mouse_layer[] = {KC_LGUI, KC_LCTL};
-uint16_t keys_to_ignore_for_disabling_mouse_layer_length = sizeof(keys_to_ignore_for_disabling_mouse_layer) / sizeof(keys_to_ignore_for_disabling_mouse_layer[0]);
+uint16_t keys_to_ignore_for_disabling_mouse_layer_length =
+    sizeof(keys_to_ignore_for_disabling_mouse_layer) /
+    sizeof(keys_to_ignore_for_disabling_mouse_layer[0]);
 
 void enable_mouse_layer(void) {
     layer_on(MOUSE);
@@ -135,52 +134,52 @@ int16_t my_abs(int16_t num) {
     return num;
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     switch (keycode) {
-        case KC_BTN1:
-        case KC_BTN2:
-        case KC_BTN3:
-        {
-            report_mouse_t currentReport = pointing_device_get_report();
+    case KC_BTN1:
+    case KC_BTN2:
+    case KC_BTN3: {
+        report_mouse_t currentReport = pointing_device_get_report();
 
-            uint8_t btn = 1 << (keycode - KC_BTN1);
-            if (record->event.pressed) {
-                currentReport.buttons |= btn;
-                mouse_state.state = CLICKING;
-                mouse_state.after_click_mouse_movement = 0;
-            } else {
-                currentReport.buttons &= ~btn;
-                mouse_state.state = MOUSE_LAYER_ENABLED;
-            }
-
-            mouse_state.mouse_moved_timer = timer_read();
-
-            pointing_device_set_report(currentReport);
-            pointing_device_send();
-            return false;
+        uint8_t btn = 1 << (keycode - KC_BTN1);
+        if (record->event.pressed) {
+            currentReport.buttons |= btn;
+            mouse_state.state = CLICKING;
+            mouse_state.after_click_mouse_movement = 0;
+        } else {
+            currentReport.buttons &= ~btn;
+            mouse_state.state = MOUSE_LAYER_ENABLED;
         }
 
-        case SCRL_TO:
-        case SCRL_MO:
-            return true;
+        mouse_state.mouse_moved_timer = timer_read();
 
-        default:
-            if  (record->event.pressed) {
-                if (mouse_state.state == CLICKING) {
-                    return true;
-                } else if (mouse_state.state == MOUSE_LAYER_ENABLED) {
-                    for (int i = 0; i < keys_to_ignore_for_disabling_mouse_layer_length; i++) {
-                        if (keycode == keys_to_ignore_for_disabling_mouse_layer[i]) {
-                            return false;
-                        }
+        pointing_device_set_report(currentReport);
+        pointing_device_send();
+        return false;
+    }
+
+    case SCRL_TO:
+    case SCRL_MO:
+        return true;
+
+    default:
+        if (record->event.pressed) {
+            if (mouse_state.state == CLICKING) {
+                return true;
+            } else if (mouse_state.state == MOUSE_LAYER_ENABLED) {
+                for (int i = 0;
+                     i < keys_to_ignore_for_disabling_mouse_layer_length; i++) {
+                    if (keycode ==
+                        keys_to_ignore_for_disabling_mouse_layer[i]) {
+                        return false;
                     }
                 }
-                disable_mouse_layer();
             }
-            return true;
+            disable_mouse_layer();
+        }
+        return true;
     }
 }
-
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     int16_t current_x;
@@ -188,66 +187,71 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
     if (mouse_report.x != 0 || mouse_report.y != 0) {
         switch (mouse_state.state) {
-            case MOUSE_LAYER_ENABLED:
-                mouse_state.mouse_moved_timer = timer_read();
-                break;
+        case MOUSE_LAYER_ENABLED:
+            mouse_state.mouse_moved_timer = timer_read();
+            break;
 
-            case CLICKING:
-                current_x = mouse_report.x;
-                current_y = mouse_report.y;
-                mouse_state.after_click_mouse_movement -= my_abs(current_x) + my_abs(current_y);
-                if (mouse_state.after_click_mouse_movement > MOUSE_MOVE_LOCK_AFTER_CLICK) {
-                    current_x = 0;
-                    current_y = 0;
-                }
-                mouse_report.x = current_x;
-                mouse_report.y = current_y;
+        case CLICKING:
+            current_x = mouse_report.x;
+            current_y = mouse_report.y;
+            mouse_state.after_click_mouse_movement -=
+                my_abs(current_x) + my_abs(current_y);
+            if (mouse_state.after_click_mouse_movement >
+                MOUSE_MOVE_LOCK_AFTER_CLICK) {
+                current_x = 0;
+                current_y = 0;
+            }
+            mouse_report.x = current_x;
+            mouse_report.y = current_y;
 
-                break;
+            break;
 
-            case MOUSE_MOVED:
-                mouse_state.mouse_movement += my_abs(current_x) + my_abs(current_y);
-                if (mouse_state.mouse_movement >= user_config.mouse_movement_threshold) {
-                    mouse_state.mouse_movement = 0;
-                    enable_mouse_layer();
-                }
-                break;
-
-            case NORMAL:
-                mouse_state.mouse_moved_timer = timer_read();
-                mouse_state.state = MOUSE_MOVED;
+        case MOUSE_MOVED:
+            mouse_state.mouse_movement += my_abs(current_x) + my_abs(current_y);
+            if (mouse_state.mouse_movement >=
+                user_config.mouse_movement_threshold) {
                 mouse_state.mouse_movement = 0;
-                break;
+                enable_mouse_layer();
+            }
+            break;
 
-            default:
-                break;
+        case NORMAL:
+            mouse_state.mouse_moved_timer = timer_read();
+            mouse_state.state = MOUSE_MOVED;
+            mouse_state.mouse_movement = 0;
+            break;
+
+        default:
+            break;
         }
     } else {
         switch (mouse_state.state) {
-            case CLICKING:
-                break;
+        case CLICKING:
+            break;
 
-            case MOUSE_LAYER_ENABLED:
-                if (!keyball_get_scroll_mode() ) {
-                    if (timer_elapsed(mouse_state.mouse_moved_timer) > MOUSE_LAYER_TIMEOUT) {
-                        disable_mouse_layer();
-                    }
+        case MOUSE_LAYER_ENABLED:
+            if (!keyball_get_scroll_mode()) {
+                if (timer_elapsed(mouse_state.mouse_moved_timer) >
+                    MOUSE_LAYER_TIMEOUT) {
+                    disable_mouse_layer();
                 }
-                break;
+            }
+            break;
 
-             case MOUSE_MOVED:
-                if (timer_elapsed(mouse_state.mouse_moved_timer) > MOUSE_MOVED_STATE_TIMEOUT) {
-                    mouse_state.mouse_movement = 0;
-                    mouse_state.state = NORMAL;
-                }
-                break;
-
-            case NORMAL:
+        case MOUSE_MOVED:
+            if (timer_elapsed(mouse_state.mouse_moved_timer) >
+                MOUSE_MOVED_STATE_TIMEOUT) {
                 mouse_state.mouse_movement = 0;
                 mouse_state.state = NORMAL;
+            }
+            break;
 
-            default:
-                break;
+        case NORMAL:
+            mouse_state.mouse_movement = 0;
+            mouse_state.state = NORMAL;
+
+        default:
+            break;
         }
     }
 
@@ -256,42 +260,42 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
 #ifdef OLED_ENABLE
 
-#    include "lib/oledkit/oledkit.h"
+#include "lib/oledkit/oledkit.h"
 
 void my_oled_render_mouse_info(void) {
     oled_write_P(PSTR("L:"), false);
     switch (current_layer) {
-        case BASE:
-            oled_write_P(PSTR("BASE "), false);
-            break;
-        case NUM:
-            oled_write_P(PSTR("NUM  "), false);
-            break;
-        case MOUSE:
-            oled_write_P(PSTR("ARROW"), false);
-            break;
-        case ARROW:
-            oled_write_P(PSTR("ARROW"), false);
-            break;
-        default:
-            break;
+    case BASE:
+        oled_write_P(PSTR("BASE "), false);
+        break;
+    case NUM:
+        oled_write_P(PSTR("NUM  "), false);
+        break;
+    case MOUSE:
+        oled_write_P(PSTR("ARROW"), false);
+        break;
+    case ARROW:
+        oled_write_P(PSTR("ARROW"), false);
+        break;
+    default:
+        break;
     }
     oled_write_P(PSTR("  M:"), false);
     switch (mouse_state.state) {
-        case MOUSE_MOVED:
-            oled_write_P(PSTR("Moved  "), false);
-            break;
-        case CLICKING:
-            oled_write_P(PSTR("Click  "), false);
-            break;
-        case MOUSE_LAYER_ENABLED:
-            oled_write_P(PSTR("Enabled"), false);
-            break;
-        case NORMAL:
-            oled_write_P(PSTR("Normal "), false);
-            break;
-        default:
-            break;
+    case MOUSE_MOVED:
+        oled_write_P(PSTR("Moved  "), false);
+        break;
+    case CLICKING:
+        oled_write_P(PSTR("Click  "), false);
+        break;
+    case MOUSE_LAYER_ENABLED:
+        oled_write_P(PSTR("Enabled"), false);
+        break;
+    case NORMAL:
+        oled_write_P(PSTR("Normal "), false);
+        break;
+    default:
+        break;
     }
 }
 
