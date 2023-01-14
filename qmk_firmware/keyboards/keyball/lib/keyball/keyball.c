@@ -17,29 +17,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "quantum.h"
 #ifdef SPLIT_KEYBOARD
-#    include "transactions.h"
+#include "transactions.h"
 #endif
 
-#include "keyball.h"
 #include "drivers/pmw3360/pmw3360.h"
+#include "keyball.h"
 
-const uint8_t CPI_DEFAULT    = KEYBALL_CPI_DEFAULT / 100;
-const uint8_t CPI_MAX        = pmw3360_MAXCPI + 1;
+const uint8_t CPI_DEFAULT = KEYBALL_CPI_DEFAULT / 100;
+const uint8_t CPI_MAX = pmw3360_MAXCPI + 1;
 const uint8_t SCROLL_DIV_MAX = 7;
 
 keyball_t keyball = {
     .this_have_ball = false,
-    .that_enable    = false,
+    .that_enable = false,
     .that_have_ball = false,
 
     .this_motion = {0},
     .that_motion = {0},
 
-    .cpi_value   = 0,
+    .cpi_value = 0,
     .cpi_changed = false,
 
     .scroll_mode = false,
-    .scroll_div  = 0,
+    .scroll_div = 0,
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,25 +66,25 @@ static inline int8_t clip2int8(int16_t v) {
     return (v) < -127 ? -127 : (v) > 127 ? 127 : (int8_t)v;
 }
 
-static const char *format_4d(int8_t d) {
+static const char* format_4d(int8_t d) {
     static char buf[5] = {0}; // max width (4) + NUL (1)
-    char        lead   = ' ';
+    char lead = ' ';
     if (d < 0) {
-        d    = -d;
+        d = -d;
         lead = '-';
     }
     buf[3] = (d % 10) + '0';
     d /= 10;
     if (d == 0) {
         buf[2] = lead;
-        lead   = ' ';
+        lead = ' ';
     } else {
         buf[2] = (d % 10) + '0';
         d /= 10;
     }
     if (d == 0) {
         buf[1] = lead;
-        lead   = ' ';
+        lead = ' ';
     } else {
         buf[1] = (d % 10) + '0';
         d /= 10;
@@ -128,16 +128,14 @@ void pointing_device_driver_init(void) {
     }
 }
 
-uint16_t pointing_device_driver_get_cpi(void) {
-    return keyball_get_cpi();
-}
+uint16_t pointing_device_driver_get_cpi(void) { return keyball_get_cpi(); }
 
-void pointing_device_driver_set_cpi(uint16_t cpi) {
-    keyball_set_cpi(cpi);
-}
+void pointing_device_driver_set_cpi(uint16_t cpi) { keyball_set_cpi(cpi); }
 
-static void motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
-#if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
+static void motion_to_mouse_move(keyball_motion_t* m, report_mouse_t* r,
+                                 bool is_left) {
+#if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 ||      \
+    KEYBALL_MODEL == 44
     r->x = clip2int8(m->y);
     r->y = clip2int8(m->x);
     if (is_left) {
@@ -148,23 +146,25 @@ static void motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is
     r->x = clip2int8(m->x);
     r->y = -clip2int8(m->y);
 #else
-#    error("unknown Keyball model")
+#error("unknown Keyball model")
 #endif
     // clear motion
     m->x = 0;
     m->y = 0;
 }
 
-static void motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
+static void motion_to_mouse_scroll(keyball_motion_t* m, report_mouse_t* r,
+                                   bool is_left) {
     // consume motion of trackball.
     uint8_t div = keyball_get_scroll_div() - 1;
-    int16_t x   = m->x >> div;
+    int16_t x = m->x >> div;
     m->x -= x << div;
     int16_t y = m->y >> div;
     m->y -= y << div;
 
     // apply to mouse report.
-#if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
+#if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 ||      \
+    KEYBALL_MODEL == 44
     r->h = clip2int8(y);
     r->v = -clip2int8(x);
     if (is_left) {
@@ -175,7 +175,7 @@ static void motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool 
     r->h = clip2int8(x);
     r->v = clip2int8(y);
 #else
-#    error("unknown Keyball model")
+#error("unknown Keyball model")
 #endif
 
 #if KEYBALL_SCROLLSNAP_ENABLE
@@ -183,17 +183,20 @@ static void motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool 
     uint32_t now = timer_read32();
     if (r->h != 0 || r->v != 0) {
         keyball.scroll_snap_last = now;
-    } else if (TIMER_DIFF_32(now, keyball.scroll_snap_last) >= KEYBALL_SCROLLSNAP_RESET_TIMER) {
+    } else if (TIMER_DIFF_32(now, keyball.scroll_snap_last) >=
+               KEYBALL_SCROLLSNAP_RESET_TIMER) {
         keyball.scroll_snap_tension_h = 0;
     }
-    if (abs(keyball.scroll_snap_tension_h) < KEYBALL_SCROLLSNAP_TENSION_THRESHOLD) {
+    if (abs(keyball.scroll_snap_tension_h) <
+        KEYBALL_SCROLLSNAP_TENSION_THRESHOLD) {
         keyball.scroll_snap_tension_h += y;
         r->h = 0;
     }
 #endif
 }
 
-static void motion_to_mouse(keyball_motion_t *m, report_mouse_t *r, bool is_left, bool as_scroll) {
+static void motion_to_mouse(keyball_motion_t* m, report_mouse_t* r,
+                            bool is_left, bool as_scroll) {
     if (as_scroll) {
         motion_to_mouse_scroll(m, r, is_left);
     } else {
@@ -212,7 +215,8 @@ static inline bool should_report(void) {
     last = now;
 #endif
 #if defined(KEYBALL_SCROLLBALL_INHIVITOR) && KEYBALL_SCROLLBALL_INHIVITOR > 0
-    if (TIMER_DIFF_32(now, keyball.scroll_mode_changed) < KEYBALL_SCROLLBALL_INHIVITOR) {
+    if (TIMER_DIFF_32(now, keyball.scroll_mode_changed) <
+        KEYBALL_SCROLLBALL_INHIVITOR) {
         keyball.this_motion.x = 0;
         keyball.this_motion.y = 0;
         keyball.that_motion.x = 0;
@@ -236,8 +240,10 @@ report_mouse_t pointing_device_driver_get_report(report_mouse_t rep) {
     // report mouse event, if keyboard is primary.
     if (is_keyboard_master() && should_report()) {
         // modify mouse report by PMW3360 motion.
-        motion_to_mouse(&keyball.this_motion, &rep, is_keyboard_left(), keyball.scroll_mode);
-        motion_to_mouse(&keyball.that_motion, &rep, !is_keyboard_left(), keyball.scroll_mode ^ keyball.this_have_ball);
+        motion_to_mouse(&keyball.this_motion, &rep, is_keyboard_left(),
+                        keyball.scroll_mode);
+        motion_to_mouse(&keyball.that_motion, &rep, !is_keyboard_left(),
+                        keyball.scroll_mode ^ keyball.this_have_ball);
         // store mouse report for OLED.
         keyball.last_mouse = rep;
     }
@@ -249,20 +255,22 @@ report_mouse_t pointing_device_driver_get_report(report_mouse_t rep) {
 
 #ifdef SPLIT_KEYBOARD
 
-static void rpc_get_info_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
+static void rpc_get_info_handler(uint8_t in_buflen, const void* in_data,
+                                 uint8_t out_buflen, void* out_data) {
     keyball_info_t info = {
         .ballcnt = keyball.this_have_ball ? 1 : 0,
     };
-    *(keyball_info_t *)out_data = info;
+    *(keyball_info_t*)out_data = info;
     keyball_on_adjust_layout(KEYBALL_ADJUST_SECONDARY);
 }
 
 static void rpc_get_info_invoke(void) {
-    static bool     negotiated = false;
-    static uint32_t last_sync  = 0;
-    static int      round      = 0;
-    uint32_t        now        = timer_read32();
-    if (negotiated || TIMER_DIFF_32(now, last_sync) < KEYBALL_TX_GETINFO_INTERVAL) {
+    static bool negotiated = false;
+    static uint32_t last_sync = 0;
+    static int round = 0;
+    uint32_t now = timer_read32();
+    if (negotiated ||
+        TIMER_DIFF_32(now, last_sync) < KEYBALL_TX_GETINFO_INTERVAL) {
         return;
     }
     last_sync = now;
@@ -274,28 +282,32 @@ static void rpc_get_info_invoke(void) {
             return;
         }
     }
-    negotiated             = true;
-    keyball.that_enable    = true;
+    negotiated = true;
+    keyball.that_enable = true;
     keyball.that_have_ball = recv.ballcnt > 0;
-    dprintf("keyball:rpc_get_info_invoke: negotiated #%d %d\n", round, keyball.that_have_ball);
+    dprintf("keyball:rpc_get_info_invoke: negotiated #%d %d\n", round,
+            keyball.that_have_ball);
 
     // split keyboard negotiation completed.
 
-#    ifdef VIA_ENABLE
+#ifdef VIA_ENABLE
     // adjust VIA layout options according to current combination.
-    uint8_t  layouts = (keyball.this_have_ball ? (is_keyboard_left() ? 0x02 : 0x01) : 0x00) | (keyball.that_have_ball ? (is_keyboard_left() ? 0x01 : 0x02) : 0x00);
-    uint32_t curr    = via_get_layout_options();
-    uint32_t next    = (curr & ~0x3) | layouts;
+    uint8_t layouts =
+        (keyball.this_have_ball ? (is_keyboard_left() ? 0x02 : 0x01) : 0x00) |
+        (keyball.that_have_ball ? (is_keyboard_left() ? 0x01 : 0x02) : 0x00);
+    uint32_t curr = via_get_layout_options();
+    uint32_t next = (curr & ~0x3) | layouts;
     if (next != curr) {
         via_set_layout_options(next);
     }
-#    endif
+#endif
 
     keyball_on_adjust_layout(KEYBALL_ADJUST_PRIMARY);
 }
 
-static void rpc_get_motion_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
-    *(keyball_motion_t *)out_data = keyball.this_motion;
+static void rpc_get_motion_handler(uint8_t in_buflen, const void* in_data,
+                                   uint8_t out_buflen, void* out_data) {
+    *(keyball_motion_t*)out_data = keyball.this_motion;
     // clear motion
     keyball.this_motion.x = 0;
     keyball.this_motion.y = 0;
@@ -303,12 +315,13 @@ static void rpc_get_motion_handler(uint8_t in_buflen, const void *in_data, uint8
 
 static void rpc_get_motion_invoke(void) {
     static uint32_t last_sync = 0;
-    uint32_t        now       = timer_read32();
+    uint32_t now = timer_read32();
     if (TIMER_DIFF_32(now, last_sync) < KEYBALL_TX_GETMOTION_INTERVAL) {
         return;
     }
     keyball_motion_t recv = {0};
-    if (transaction_rpc_exec(KEYBALL_GET_MOTION, 0, NULL, sizeof(recv), &recv)) {
+    if (transaction_rpc_exec(KEYBALL_GET_MOTION, 0, NULL, sizeof(recv),
+                             &recv)) {
         keyball.that_motion.x = add16(keyball.that_motion.x, recv.x);
         keyball.that_motion.y = add16(keyball.that_motion.y, recv.y);
     }
@@ -316,8 +329,9 @@ static void rpc_get_motion_invoke(void) {
     return;
 }
 
-static void rpc_set_cpi_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
-    keyball_set_cpi(*(keyball_cpi_t *)in_data);
+static void rpc_set_cpi_handler(uint8_t in_buflen, const void* in_data,
+                                uint8_t out_buflen, void* out_data) {
+    keyball_set_cpi(*(keyball_cpi_t*)in_data);
 }
 
 static void rpc_set_cpi_invoke(void) {
@@ -410,9 +424,7 @@ void keyball_oled_render_keyinfo(void) {
 //////////////////////////////////////////////////////////////////////////////
 // Public API functions
 
-bool keyball_get_scroll_mode(void) {
-    return keyball.scroll_mode;
-}
+bool keyball_get_scroll_mode(void) { return keyball.scroll_mode; }
 
 void keyball_set_scroll_mode(bool mode) {
     if (mode != keyball.scroll_mode) {
@@ -422,7 +434,8 @@ void keyball_set_scroll_mode(bool mode) {
 }
 
 uint8_t keyball_get_scroll_div(void) {
-    return keyball.scroll_div == 0 ? KEYBALL_SCROLL_DIV_DEFAULT : keyball.scroll_div;
+    return keyball.scroll_div == 0 ? KEYBALL_SCROLL_DIV_DEFAULT
+                                   : keyball.scroll_div;
 }
 
 void keyball_set_scroll_div(uint8_t div) {
@@ -437,7 +450,7 @@ void keyball_set_cpi(uint8_t cpi) {
     if (cpi > CPI_MAX) {
         cpi = CPI_MAX;
     }
-    keyball.cpi_value   = cpi;
+    keyball.cpi_value = cpi;
     keyball.cpi_changed = true;
     if (keyball.this_have_ball) {
         pmw3360_cpi_set(cpi == 0 ? CPI_DEFAULT - 1 : cpi - 1);
@@ -481,9 +494,9 @@ void housekeeping_task_kb(void) {
 }
 #endif
 
-bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
+bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
     // store last keycode, row, and col for OLED
-    keyball.last_kc  = keycode;
+    keyball.last_kc = keycode;
     keyball.last_pos = record->event.key;
 
     if (!process_record_user(keycode, record)) {
@@ -497,61 +510,62 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 
     switch (keycode) {
 #ifndef MOUSEKEY_ENABLE
-        // process KC_MS_BTN1~8 by myself
-        // See process_action() in quantum/action.c for details.
-        case KC_MS_BTN1 ... KC_MS_BTN8: {
-            extern void register_button(bool, enum mouse_buttons);
-            register_button(record->event.pressed, MOUSE_BTN_MASK(keycode - KC_MS_BTN1));
-            // to apply QK_MODS actions, allow to process others.
-            return true;
-        }
+    // process KC_MS_BTN1~8 by myself
+    // See process_action() in quantum/action.c for details.
+    case KC_MS_BTN1 ... KC_MS_BTN8: {
+        extern void register_button(bool, enum mouse_buttons);
+        register_button(record->event.pressed,
+                        MOUSE_BTN_MASK(keycode - KC_MS_BTN1));
+        // to apply QK_MODS actions, allow to process others.
+        return true;
+    }
 #endif
 
-        case SCRL_MO:
-            keyball_set_scroll_mode(record->event.pressed);
-            return false;
+    case SCRL_MO:
+        keyball_set_scroll_mode(record->event.pressed);
+        return false;
     }
 
     // process events which works on pressed only.
     if (record->event.pressed) {
         switch (keycode) {
-            case KBC_RST:
-                keyball_set_cpi(0);
-                keyball_set_scroll_div(0);
-                break;
-            case KBC_SAVE: {
-                keyball_config_t c = {
-                    .cpi  = keyball.cpi_value,
-                    .sdiv = keyball.scroll_div,
-                };
-                eeconfig_update_kb(c.raw);
-            } break;
+        case KBC_RST:
+            keyball_set_cpi(0);
+            keyball_set_scroll_div(0);
+            break;
+        case KBC_SAVE: {
+            keyball_config_t c = {
+                .cpi = keyball.cpi_value,
+                .sdiv = keyball.scroll_div,
+            };
+            eeconfig_update_kb(c.raw);
+        } break;
 
-            case CPI_I100:
-                add_cpi(1);
-                break;
-            case CPI_D100:
-                add_cpi(-1);
-                break;
-            case CPI_I1K:
-                add_cpi(10);
-                break;
-            case CPI_D1K:
-                add_cpi(-10);
-                break;
+        case CPI_I100:
+            add_cpi(1);
+            break;
+        case CPI_D100:
+            add_cpi(-1);
+            break;
+        case CPI_I1K:
+            add_cpi(10);
+            break;
+        case CPI_D1K:
+            add_cpi(-10);
+            break;
 
-            case SCRL_TO:
-                keyball_set_scroll_mode(!keyball.scroll_mode);
-                break;
-            case SCRL_DVI:
-                add_scroll_div(1);
-                break;
-            case SCRL_DVD:
-                add_scroll_div(-1);
-                break;
+        case SCRL_TO:
+            keyball_set_scroll_mode(!keyball.scroll_mode);
+            break;
+        case SCRL_DVI:
+            add_scroll_div(1);
+            break;
+        case SCRL_DVD:
+            add_scroll_div(-1);
+            break;
 
-            default:
-                return true;
+        default:
+            return true;
         }
         return false;
     }
