@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+#include "action.h"
 #include "avr/pgmspace.h"
 #include "keyball44/config.h"
 #include "keyball44/keyball44.h"
@@ -25,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointing_device/pointing_device_auto_mouse.h"
 #include "quantum.h"
 #include "report.h"
+#include "rgblight/rgblight.h"
 #include "stdint.h"
 
 enum layers {
@@ -32,6 +34,7 @@ enum layers {
     NUM,
     MOUSE,
     ARROW,
+    SYSTEM,
 };
 
 // clang-format off
@@ -41,14 +44,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     LT(ARROW, KC_ESC) , KC_Q    , KC_W    , KC_E     , KC_R     , KC_T     ,                                  KC_Y     , KC_U     , KC_I     , KC_O     , KC_P           , LT(ARROW, KC_LBRC),
     LCTL_T(KC_TAB)    , KC_A    , KC_S    , KC_D     , KC_F     , KC_G     ,                                  KC_H     , KC_J     , KC_K     , KC_L     , RCTL_T(KC_SCLN), C_S_T(KC_RBRC) ,
     LSFT_T(KC_MINS)   , KC_Z    , KC_X    , KC_C     , KC_V     , KC_B     ,                                  KC_N     , KC_M     , KC_COMM  , KC_DOT   , RSFT_T(KC_SLSH), RALT_T(KC_BSLS),
-                                  TO(BASE), KC_F12,     KC_BSPC ,KC_SPC, KC_LGUI,                   KC_RGUI, LT(NUM,KC_ENT)       , _______  , _______  , _______
+                                  TO(BASE), KC_F12,     KC_BSPC ,KC_SPC, KC_LGUI,                   KC_RGUI, LT(NUM,KC_ENT)       , _______  , _______  , KC_MEH
   ),
 
   [NUM] = LAYOUT_universal(
     KC_EQL      ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0) , KC_QUOT ,
     S(KC_EQL)   ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0    , S(KC_QUOT) ,
     S(KC_GRAVE) ,  RCS(KC_1) , RCS(KC_2) , RCS(KC_3) , RCS(KC_4) , RCS(KC_5) ,                                       RCS(KC_6) , RCS(KC_7) , RCS(KC_8) , RCS(KC_9) , KC_DEL  , KC_GRAVE ,
-                                     _______   , _______       , _______ , _______ , _______ ,                      _______  , _______           , _______   , _______   , _______
+                               _______   , _______       , KC_DEL , _______ , _______ ,              _______  , _______        , _______   , _______   , _______
   ),
 
   [MOUSE] = LAYOUT_universal(
@@ -59,11 +62,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [ARROW] = LAYOUT_universal(
-    RGB_TOG  , _______  , KBC_RST , KBC_SAVE , SCRL_DVD , SCRL_DVI ,                                       KC_HOME    , KC_PGDN    , KC_PGUP  , KC_END      , _______ , _______ ,
-    RGB_MOD  , RGB_HUI  , RGB_SAI , RGB_VAI  , CPI_D1K  , CPI_I1K  ,                                       KC_LEFT    , KC_DOWN    , KC_UP    , KC_RIGHT    , _______ , _______ ,
-    RGB_RMOD , RGB_HUD  , RGB_SAD , RGB_VAD  , CPI_D100 , CPI_I100 ,                                       C(KC_LEFT) , C(KC_DOWN) , C(KC_UP) , C(KC_RIGHT) , _______ , _______ ,
-                         _______ , _______    , _______ , _______ , QK_BOOT ,                      _______  , _______              , _______  , _______     , _______
+    _______ , _______  , KBC_RST , KBC_SAVE , SCRL_DVD , SCRL_DVI ,                                       KC_HOME    , KC_PGDN    , KC_PGUP  , KC_END      , _______ , _______ ,
+    _______ , RGB_HUI  , RGB_SAI , RGB_VAI  , CPI_D1K  , CPI_I1K  ,                                       KC_LEFT    , KC_DOWN    , KC_UP    , KC_RIGHT    , _______ , _______ ,
+    _______ , RGB_HUD  , RGB_SAD , RGB_VAD  , CPI_D100 , CPI_I100 ,                                       C(KC_LEFT) , C(KC_DOWN) , C(KC_UP) , C(KC_RIGHT) , _______ , _______ ,
+                       _______ , _______              , _______ , _______ , QK_BOOT ,                      _______  , _______              , _______  , _______     , _______
   ),
+  
+  [SYSTEM] = LAYOUT_universal(
+    RGB_TOG          , _______  , KBC_RST , KBC_SAVE , SCRL_DVD , SCRL_DVI ,                                       KC_HOME    , KC_PGDN    , KC_PGUP  , KC_END      , _______ , _______ ,
+    LCTL_T(RGB_MOD)  , RGB_HUI  , RGB_SAI , RGB_VAI  , CPI_D1K  , CPI_I1K  ,                                       KC_LEFT    , KC_DOWN    , KC_UP    , KC_RIGHT    , _______ , _______ ,
+    LSFT_T(RGB_RMOD) , RGB_HUD  , RGB_SAD , RGB_VAD  , CPI_D100 , CPI_I100 ,                                       C(KC_LEFT) , C(KC_DOWN) , C(KC_UP) , C(KC_RIGHT) , _______ , _______ ,
+                       _______ , _______              , _______ , _______ , QK_BOOT ,                      _______  , _______              , _______  , _______     , _______
+  ),
+  
 };
 // clang-format on
 
@@ -89,7 +100,39 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t* record) {
     }
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t* record) { return true; }
+bool is_tapped = false;
+
+bool process_record_user(uint16_t keycode, keyrecord_t* record) {
+    switch (keycode) {
+    case LCTL_T(RGB_MOD):
+        if (record->event.pressed) {
+            register_code(KC_LCTL);
+            is_tapped = true;
+        } else {
+            unregister_code(KC_LCTL);
+            if (is_tapped) {
+                rgblight_step();
+                is_tapped = false;
+            }
+        }
+        return false;
+    case LSFT_T(RGB_RMOD):
+        if (record->event.pressed) {
+            register_code(KC_LSFT);
+            is_tapped = true;
+        } else {
+            unregister_code(KC_LSFT);
+            if (is_tapped) {
+                rgblight_step_reverse();
+                is_tapped = false;
+            }
+        }
+        return false;
+    default:
+        is_tapped = false;
+        return true;
+    }
+}
 
 #ifdef OLED_ENABLE
 

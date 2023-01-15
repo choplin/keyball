@@ -1,6 +1,8 @@
 -I/opt/homebrew/Cellar/avr-gcc@8/8.5.0/avr/include
 -I/opt/homebrew/Cellar/avr-gcc@8/8.5.0/lib/avr-gcc/8/gcc/avr/8.5.0/include
 -I/opt/homebrew/Cellar/avr-gcc@8/8.5.0/lib/avr-gcc/8/gcc/avr/8.5.0/include-fixed
+-I../qmk_firmware
+-I../qmk_firmware/drivers
 -I../qmk_firmware/quantum
 -I../qmk_firmware/quantum/logging
 -I../qmk_firmware/quantum/keymap_extras
@@ -14,4 +16,5 @@
 -DQMK_KEYBOARD_H=<quantum.h>
 -D__AVR_ATmega32U4__
 -DPOINTING_DEVICE_AUTO_MOUSE_ENABLE
+-DRGBLED_NUM
 -Wno-macro-redefined
