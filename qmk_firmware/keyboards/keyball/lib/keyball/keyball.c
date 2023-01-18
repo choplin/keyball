@@ -427,6 +427,9 @@ void keyball_oled_render_keyinfo(void) {
 bool keyball_get_scroll_mode(void) { return keyball.scroll_mode; }
 
 void keyball_set_scroll_mode(bool mode) {
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+    set_auto_mouse_enable(!mode);
+#endif
     if (mode != keyball.scroll_mode) {
         keyball.scroll_mode_changed = timer_read32();
     }
