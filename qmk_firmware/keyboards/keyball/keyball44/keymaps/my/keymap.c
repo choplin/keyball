@@ -102,6 +102,10 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t* record) {
 bool is_tapped = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
+    if (keyball_get_scroll_mode() && keycode != SCRL_TO &&
+        record->event.pressed) {
+        keyball_set_scroll_mode(false);
+    }
     switch (keycode) {
     case LCTL_T(RGB_MOD):
         if (record->event.pressed) {
