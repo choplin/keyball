@@ -43,3 +43,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
 
 #define DYNAMIC_KEYMAP_LAYER_COUNT 5
+
+#define KEYBALL_SCROLLSNAP_TENSION_THRESHOLD 7
