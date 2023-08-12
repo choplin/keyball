@@ -37,7 +37,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KEYBALL_SCROLL_DIV_DEFAULT 7
 
 #define TAPPING_TERM 200
-#define IGNORE_MOD_TAP_INTERRUPT
 #define HOLD_ON_OTHER_KEY_PRESS
 
 #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
