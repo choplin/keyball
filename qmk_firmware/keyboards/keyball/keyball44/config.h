@@ -18,8 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "config_common.h"
-
 // Key matrix parameters
 #define MATRIX_ROWS (4 * 2) // split keyboard
 #define MATRIX_COLS 6
