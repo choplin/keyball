@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "action.h"
 #include "avr/pgmspace.h"
+#include "default_keyboard.h"
+#include "drivers/oled/oled_driver.h"
+#include "info_config.h"
 #include "keyball44/config.h"
 #include "keyball44/keyball44.h"
 #include "pointing_device/pointing_device.h"
@@ -38,41 +41,40 @@ enum layers {
 };
 
 // clang-format off
-// const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [BASE] = LAYOUT_universal(
+  [BASE] = LAYOUT_right_ball(
     LT(ARROW, KC_ESC) , KC_Q    , KC_W    , KC_E     , KC_R     , KC_T     ,                                  KC_Y     , KC_U     , KC_I     , KC_O     , KC_P           , LT(ARROW, KC_LBRC),
     LCTL_T(KC_TAB)    , KC_A    , KC_S    , KC_D     , KC_F     , KC_G     ,                                  KC_H     , KC_J     , KC_K     , KC_L     , RCTL_T(KC_SCLN), C_S_T(KC_RBRC) ,
     LSFT_T(KC_MINS)   , KC_Z    , KC_X    , KC_C     , KC_V     , KC_B     ,                                  KC_N     , KC_M     , KC_COMM  , KC_DOT   , RSFT_T(KC_SLSH), RALT_T(KC_BSLS),
-                                  MO(SYSTEM), KC_APP, LSFT_T(KC_BSPC) ,KC_SPC, KC_LGUI,                   KC_RGUI, LT(NUM,KC_ENT)       , _______  , _______  , KC_MEH
+                                  MO(SYSTEM), KC_APP, LSFT_T(KC_BSPC) ,KC_SPC, KC_LGUI,                   KC_RGUI, LT(NUM,KC_ENT)                             , KC_MEH
   ),
 
-  [NUM] = LAYOUT_universal(
+  [NUM] = LAYOUT_right_ball(
     KC_EQL      ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0) , KC_QUOT ,
     S(KC_EQL)   ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0    , S(KC_QUOT) ,
     S(KC_GRAVE) ,  RCS(KC_1) , RCS(KC_2) , RCS(KC_3) , RCS(KC_4) , RCS(KC_5) ,                                       RCS(KC_6) , RCS(KC_7) , RCS(KC_8) , RCS(KC_9) , KC_DEL  , KC_GRAVE ,
-                               _______   , _______       , LAG(KC_NO) , _______ , _______ ,              _______  , _______        , _______   , _______   , _______
+                               _______   , _______       , LAG(KC_NO) , _______ , _______ ,              _______  , _______                                , _______
   ),
 
-  [MOUSE] = LAYOUT_universal(
+  [MOUSE] = LAYOUT_right_ball(
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        _______  , _______ , _______ , _______ , _______ , _______ ,
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        SCRL_TO  , KC_BTN1 , SCRL_MO , KC_BTN2 , _______ , _______ ,
     _______ , _______ , _______ , _______ , _______ , _______ ,                                        _______  , _______ , _______ , _______ , _______ , _______ ,
-                        _______ , _______  ,    _______  , _______  , _______  ,                _______  , _______        , _______ , _______ , _______
+                        _______ , _______  ,    _______  , _______  , _______  ,                _______  , _______                            , _______
   ),
 
-  [SYSTEM] = LAYOUT_universal(
+  [SYSTEM] = LAYOUT_right_ball(
     RGB_TOG  , _______  , _______ , _______ , _______ , _______ ,                                       KBC_SAVE , _______ , _______  , _______ , _______ , _______ ,
     RGB_MOD  , RGB_HUI  , RGB_SAI , RGB_VAI , _______ , _______ ,                                       SCRL_DVI , CPI_I1K , CPI_I100 , _______ , _______ , _______ ,
     RGB_RMOD , RGB_HUD  , RGB_SAD , RGB_VAD , _______ , _______ ,                                       SCRL_DVD , CPI_D1K , CPI_D100 , _______ , _______ , _______ ,
-                       _______ , _______              , EE_CLR , _______ , QK_BOOT ,       _______  , _______              , _______  , _______ , _______
+                       _______ , _______              , EE_CLR , _______ , QK_BOOT ,       _______  , _______                                   , _______
   ),
 
-  [ARROW] = LAYOUT_universal(
+  [ARROW] = LAYOUT_right_ball(
     _______ , _______  , _______ , _______ , _______ , _______ ,                                       KC_HOME    , KC_PGDN    , KC_PGUP  , KC_END      , _______ , _______ ,
     _______ , _______  , _______ , _______ , _______ , _______ ,                                       KC_LEFT    , KC_DOWN    , KC_UP    , KC_RIGHT    , _______ , _______ ,
     _______ , _______  , _______ , _______ , _______ , _______ ,                                       A(KC_LEFT) , A(KC_DOWN) , A(KC_UP) , A(KC_RIGHT) , _______ , _______ ,
-                         _______ , _______              , _______ , _______ , _______ ,       _______  , _______               , _______  , _______     , _______
+                         _______ , _______              , _______ , _______ , _______ ,       _______  , _______                                        , _______
   ),
 };
 // clang-format on

@@ -11,10 +11,13 @@
 -I../qmk_firmware/platforms
 -I../qmk_firmware/platforms/avr
 -I../qmk_firmware/tmk_core/protocol
--I./qmk_firmware/keyboards/keyball
--I./qmk_firmware/keyboards/keyball/lib/keyball
+-I../qmk_firmware/keyboards/keyball
+-I../qmk_firmware/keyboards/keyball/lib/keyball
+-I../qmk_firmware/.build/obj_keyball_keyball44/src
 -DQMK_KEYBOARD_H=<quantum.h>
 -D__AVR_ATmega32U4__
 -DPOINTING_DEVICE_AUTO_MOUSE_ENABLE
 -DRGBLED_NUM
 -Wno-macro-redefined
+-DRGBLIGHT_ENABLE
+-DOLED_ENABLE
