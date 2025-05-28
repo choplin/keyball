@@ -64,10 +64,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [SYSTEM] = LAYOUT_right_ball(
-    RGB_TOG  , _______  , _______ , _______ , _______ , _______ ,                                       KBC_SAVE , _______ , _______  , _______ , _______ , _______ ,
-    RGB_MOD  , RGB_HUI  , RGB_SAI , RGB_VAI , _______ , _______ ,                                       SCRL_DVI , CPI_I1K , CPI_I100 , _______ , _______ , _______ ,
-    RGB_RMOD , RGB_HUD  , RGB_SAD , RGB_VAD , _______ , _______ ,                                       SCRL_DVD , CPI_D1K , CPI_D100 , _______ , _______ , _______ ,
-                       _______ , _______              , EE_CLR , _______ , QK_BOOT ,       _______  , _______                                   , _______
+    RGB_TOG  , _______  , _______ , _______ , _______ , AML_TO ,                                       _______ , _______ , _______  , _______ , _______ , KBC_SAVE ,
+    RGB_MOD  , RGB_HUI  , RGB_SAI , RGB_VAI , _______ , AML_I50 ,                                       SCRL_DVI , CPI_I1K , CPI_I100 , _______ , _______ , KBC_RST ,
+    RGB_RMOD , RGB_HUD  , RGB_SAD , RGB_VAD , _______ , AML_D50 ,                                       SCRL_DVD , CPI_D1K , CPI_D100 , _______ , _______ , _______ ,
+                       _______ , _______              , _______ , _______ , QK_BOOT ,       EE_CLR  , _______                                   , _______
   ),
 
   [ARROW] = LAYOUT_right_ball(
@@ -86,11 +86,6 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 
-void pointing_device_init_user(void) {
-    set_auto_mouse_layer(MOUSE);
-    set_auto_mouse_enable(true);
-}
-
 bool is_mouse_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
     case SCRL_MO:
@@ -102,9 +97,34 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (keyball_get_scroll_mode() && keycode != SCRL_TO &&
-        record->event.pressed) {
+    // Leave scroll mode when any key is pressed
+    if (keyball_get_scroll_mode() && record->event.pressed) {
+        set_auto_mouse_enable(true);
         keyball_set_scroll_mode(false);
+        layer_off(MOUSE);
+    }
+
+    switch (keycode) {
+    // Leave mouse layer when any modifier key is pressed
+    case KC_LCTL:
+    case KC_RCTL:
+    case KC_LGUI:
+    case KC_RGUI:
+    case KC_LALT:
+    case KC_RALT:
+    case KC_LSFT:
+    case KC_RSFT:
+        if (record->event.pressed) {
+            layer_off(MOUSE);
+        }
+        return true;
+    case SCRL_TO:
+        if (record->event.pressed) {
+            set_auto_mouse_enable(false);
+        }
+        return true;
+    default:
+        return true;
     }
     return true;
 }
