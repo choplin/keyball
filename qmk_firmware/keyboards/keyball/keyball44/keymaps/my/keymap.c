@@ -25,11 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "info_config.h"
 #include "keyball44/config.h"
 #include "keyball44/keyball44.h"
-#include "pointing_device/pointing_device.h"
 #include "pointing_device/pointing_device_auto_mouse.h"
+#include "process_keycode/process_combo.h"
 #include "quantum.h"
 #include "report.h"
-#include "rgblight/rgblight.h"
 #include "stdint.h"
 
 enum layers {
@@ -78,6 +77,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 };
 // clang-format on
+
+const uint16_t PROGMEM thumb_combo_1[] = {KC_LGUI, KC_RGUI, COMBO_END};
+const uint16_t PROGMEM thumb_combo_2[] = {LT(NUM, KC_ENT), KC_SPC, COMBO_END};
+const uint16_t PROGMEM thumb_combo_3[] = {LT(NUM, KC_ENT), LSFT_T(KC_BSPC),
+                                          COMBO_END};
+combo_t key_combos[] = {
+    COMBO(thumb_combo_1, KC_F11),
+    COMBO(thumb_combo_2, KC_F12),
+    COMBO(thumb_combo_3, KC_F13),
+};
 
 int current_layer = BASE;
 layer_state_t layer_state_set_user(layer_state_t state) {
