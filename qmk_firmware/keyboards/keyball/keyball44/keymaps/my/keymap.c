@@ -50,10 +50,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [NUM] = LAYOUT_right_ball(
-    KC_EQL      ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0) , KC_QUOT ,
-    S(KC_EQL)   ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0    , S(KC_QUOT) ,
-    S(KC_GRAVE) ,  MEH(KC_1) , MEH(KC_2) , MEH(KC_3) , MEH(KC_4) , MEH(KC_5) ,                                       MEH(KC_6) , MEH(KC_7) , MEH(KC_8) , MEH(KC_9) , KC_DEL  , KC_GRAVE ,
-                               _______   , _______       , LAG(KC_NO) , _______ , _______ ,              _______  , _______                                , _______
+    KC_EQL      ,  S(KC_1)   , S(KC_2)   , S(KC_3)   , S(KC_4)   , S(KC_5)   ,                                       S(KC_6)   , S(KC_7)   , S(KC_8)   , S(KC_9)   , S(KC_0)  , KC_QUOT ,
+    S(KC_EQL)   ,  KC_1      , KC_2      , KC_3      , KC_4      , KC_5      ,                                       KC_6      , KC_7      , KC_8      , KC_9      , KC_0     , S(KC_QUOT) ,
+    S(KC_GRAVE) ,  MEH(KC_1) , MEH(KC_2) , MEH(KC_3) , MEH(KC_4) , MEH(KC_5) ,                                       MEH(KC_6) , MEH(KC_7) , MEH(KC_8) , MEH(KC_9) , MEH(KC_0), KC_GRAVE ,
+                               _______   , _______       , KC_DEL, _______ , _______ ,              _______  , _______                                , _______
   ),
 
   [MOUSE] = LAYOUT_right_ball(
@@ -82,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 int current_layer = BASE;
 layer_state_t layer_state_set_user(layer_state_t state) {
     current_layer = get_highest_layer(state);
-    keyball_set_scroll_mode(get_highest_layer(state) == ARROW);
+    // keyball_set_scroll_mode(get_highest_layer(state) == ARROW);
     return state;
 }
 
@@ -96,12 +96,28 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
+#define AUTO_MOUSE_THRESHOLD 3
+
+bool auto_mouse_activation(report_mouse_t mouse_report) {
+    int32_t cursor_distance_squared = (int32_t)mouse_report.x * mouse_report.x +
+                                      (int32_t)mouse_report.y * mouse_report.y;
+    int32_t scroll_distance_squared = (int32_t)mouse_report.h * mouse_report.h +
+                                      (int32_t)mouse_report.v * mouse_report.v;
+
+    int32_t threshold_squared = AUTO_MOUSE_THRESHOLD * AUTO_MOUSE_THRESHOLD;
+    bool significant_movement = (cursor_distance_squared > threshold_squared ||
+                                 scroll_distance_squared > threshold_squared);
+
+    return significant_movement || mouse_report.buttons;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // Leave scroll mode when any key is pressed
     if (keyball_get_scroll_mode() && record->event.pressed) {
         set_auto_mouse_enable(true);
         keyball_set_scroll_mode(false);
         layer_off(MOUSE);
+        return false;
     }
 
     switch (keycode) {
@@ -121,6 +137,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case SCRL_TO:
         if (record->event.pressed) {
             set_auto_mouse_enable(false);
+        }
+        return true;
+    case SCRL_MO:
+        if (!record->event.pressed) {
+            layer_off(MOUSE);
         }
         return true;
     default:
