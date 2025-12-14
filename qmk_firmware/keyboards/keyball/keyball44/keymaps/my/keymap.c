@@ -133,12 +133,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // Leave mouse layer when any modifier key is pressed
     case KC_LCTL:
     case KC_RCTL:
-    case KC_LGUI:
-    case KC_RGUI:
+    // case KC_LGUI:
+    // case KC_RGUI:
     case KC_LALT:
     case KC_RALT:
     case KC_LSFT:
     case KC_RSFT:
+    case LT(NUM, KC_ENT):
         if (record->event.pressed) {
             layer_off(MOUSE);
         }
